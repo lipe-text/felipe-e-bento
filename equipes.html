@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipamentos para eventos de futebol</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Alinha o conteúdo ao topo da página */
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .balão {
+            display: flex;
+            flex-direction: column; /* Organiza verticalmente */
+            align-items: center; /* Organiza centralmente */
+            width: 100%; /* Garante que a largura da balão ocupe toda a página */
+            padding-top: 20px; /* Espaço no topo da página */
+        }
+
+        .img {
+            width: 270px; /* Largura das imagens */
+            height: 270px; /* Novo tamanho das bolas */
+            border-radius: 50%;
+            object-fit: cover;
+            transition: transform 0.3s; /* Transição suave */
+        }
+        .img:hover { /*imagens sobem*/ 
+            transform: translateY(-10px);
+        }
+        .pos {
+            text-align: center; /* Centraliza o conteúdo dentro do elemento */
+            margin-bottom: 15px; 
+            margin-top: 15px; 
+        }
+        
+        section {
+            background-color: #D3D3D3;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 30%;
+            text-align: center; /* Centraliza o texto e o conteúdo interno */
+            align-items: center; /* Garante que o conteúdo seja centralizado verticalmente, se houver mais de uma linha */
+        }
+
+        button {
+            background-color: #4169E1;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .h1 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px; 
+        }
+        .remove-btn {
+            margin-left: 10px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        /* Adiciona cursor */
+        li {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Código do pop-up */
+        .pop-up {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        
+        /* Design do pop-up */
+        .pop-up-design {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            text-align: center;
+        }
+
+        /* Botão de fechar do pop-up */
+        .fechar {
+            color: #000;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Estilo da caixa de texto e botão de seleção de imagem */
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+
+        .input-container input[type="text"] {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #fff;
+        }
+
+        .input-container input[type="file"] {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="balão">
+        <div class="pos">
+            <a href="Listas.html" target="_blank">
+                <img src="equipe.jpg" alt="Imagem 1" class="img">
+            </a>
+        </div>
+        <section>
+            <h2>Equipamentos Necessários</h2>
+            <ul id="equipamentos-list"></ul>
+            <div class="input-container">
+                <input type="text" id="equipamentos-input" placeholder="Adicionar nome da equipe...">
+                <input type="text" id="equipamentos-description" placeholder="Adicionar descrição da equipe...">
+                <input type="file" id="equipamentos-image" accept="image/*">
+                <button onclick="addItem('equipamentos')">Adicionar</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Pop-up -->
+    <div id="myPopUp" class="pop-up">
+        <div class="pop-up-design">
+            <span class="fechar">&times;</span>
+            <h1 id="pop-up-title"></h1>
+            <p id="pop-up-description"></p>
+            <img id="pop-up-image" src="" alt="Imagem do equipamento" style="width: 100%; max-width: 300px;">
+        </div>
+    </div>
+
+    <script>
+        function addItem(listType) {
+            let inputId = `${listType}-input`;
+            let descriptionId = `${listType}-description`;
+            let listId = `${listType}-list`;
+            let inputValue = document.getElementById(inputId).value;
+            let descriptionValue = document.getElementById(descriptionId).value;
+            let fileInput = document.getElementById(`${listType}-image`);
+            let file = fileInput.files[0];
+            let imageUrl = '';
+
+            if (inputValue === '') {
+                alert('Por favor, adicione um item.');
+                return;
+            }
+
+            if (file) {
+                // Cria uma URL temporária para o arquivo de imagem
+                imageUrl = URL.createObjectURL(file);
+            }
+
+            let li = document.createElement('li');
+            li.textContent = inputValue;
+            li.onclick = function() {
+                showPopUp(inputValue, descriptionValue, imageUrl);
+            };
+
+            let deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Remover';
+            deleteBtn.className = 'remove-btn';
+            deleteBtn.onclick = function(event) {
+                event.stopPropagation(); // Impede o evento de clique do item da lista de ser acionado
+                this.parentElement.remove();
+            };
+
+            li.appendChild(deleteBtn);
+            document.getElementById(listId).appendChild(li);
+
+            document.getElementById(inputId).value = '';
+            document.getElementById(descriptionId).value = '';
+            fileInput.value = ''; // Limpa a seleção de arquivo
+        }
+
+        // Mostra o pop-up com as informações dadas
+        function showPopUp(titleText, descriptionText, imageUrl) {
+            let popUp = document.getElementById("myPopUp");
+            let title = document.getElementById("pop-up-title");
+            let description = document.getElementById("pop-up-description");
+            let image = document.getElementById("pop-up-image");
+
+            // Define os dados que vão aparecer no pop-up
+            title.textContent = titleText;
+            description.textContent = descriptionText;
+            image.src = imageUrl;
+
+            popUp.style.display = "block";
+        }
+
+        // Botão de fechar
+        let popUp = document.getElementById("myPopUp");
+        let fecharButton = document.getElementsByClassName("fechar")[0];
+
+        fecharButton.onclick = function() {
+            popUp.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == popUp) {
+                popUp.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
